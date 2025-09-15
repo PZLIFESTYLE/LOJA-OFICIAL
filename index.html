@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PZ LIFESTYLE — Loja Oficial</title>
+  <link rel="shortcut icon" href="logo-removebg-preview.png" type="image/x-icon">
+
+  <style>
+    :root{
+      --pz-blue: #1266d6;       
+      --pz-dark: #0b0b0b;
+      --pz-white: #ffffff;
+      --accent: #ffd166;
+      --muted: #f5f7fb;
+      --radius: 12px;
+    }
+
+    /* Reset & base */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      margin:0;
+      color:var(--pz-dark);
+      background: linear-gradient(180deg, var(--muted) 0%, #fff 100%);
+      -webkit-font-smoothing:antialiased;
+      scroll-behavior:smooth;
+    }
+
+    /* Loading screen */
+    #loading {
+      position:fixed; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      background:var(--pz-blue);
+      z-index:9999;
+      transition:opacity .5s ease;
+    }
+    #loading.hidden { opacity:0; pointer-events:none; }
+    #loading img { width:140px; height:auto; filter:drop-shadow(0 6px 18px rgba(0,0,0,.45)); transform-origin:center; animation:logo-bounce 1.3s infinite ease-in-out; }
+    @keyframes logo-bounce {
+      0%{ transform: translateY(0) scale(1) }
+      50%{ transform: translateY(-8px) scale(1.03) }
+      100%{ transform: translateY(0) scale(1) }
+    }
+
+    /* Header / Nav */
+    header{
+      position:fixed; left:0; right:0; top:0;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 20px; gap:12px;
+      background:transparent;
+      transition:backdrop-filter .25s ease, background-color .25s ease, box-shadow .25s ease;
+      z-index:1000;
+    }
+    header.scrolled{
+      backdrop-filter: blur(6px);
+      background: rgba(255,255,255,.85);
+      box-shadow: 0 6px 18px rgba(14,20,30,.08);
+    }
+    .brand { display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--pz-dark) }
+    .brand img{ width:48px; height:48px; object-fit:contain; border-radius:10px; background:var(--pz-white); padding:6px }
+    .brand h1{ font-size:1rem; letter-spacing:1px; margin:0; color:var(--pz-dark) }
+
+    nav.main { display:flex; gap:14px; align-items:center; }
+    nav.main a{ text-decoration:none; color:var(--pz-dark); font-weight:600; padding:8px 12px; border-radius:8px; transition:background .15s, color .15s }
+    nav.main a:hover{ background:rgba(18,102,214,.08) }
+
+    /* hero */
+    .hero{
+      margin-top:86px;
+      min-height:56vh;
+      display:flex; align-items:center; justify-content:center;
+      padding:48px 22px;
+      background: linear-gradient(180deg, var(--pz-blue) 0%, #0f5fc9 50%);
+      color:var(--pz-white);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero .wrap{
+      max-width:1100px; width:100%; display:grid; grid-template-columns: 1fr 420px; gap:36px; align-items:center;
+    }
+    .hero h2{ font-size:2.6rem; margin:0 0 18px; line-height:1.02; letter-spacing:-0.5px }
+    .hero p{ margin:0 0 22px; opacity:.95; font-size:1.05rem; max-width:50ch }
+    .cta-row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+    .btn{
+      display:inline-flex; align-items:center; gap:10px;
+      background:var(--pz-dark); color:var(--pz-white); border:none; padding:12px 16px;
+      border-radius:10px; cursor:pointer; font-weight:700; text-decoration:none;
+      box-shadow: 0 8px 20px rgba(6,8,14,.18); transition: transform .15s ease, box-shadow .15s;
+    }
+    .btn:hover{ transform:translateY(-4px) }
+    .btn.secondary{ background:transparent; color:var(--pz-white); border:2px solid rgba(255,255,255,.12) }
+
+    /* hero logo card */
+    .hero-card{
+      background:var(--pz-white); color:var(--pz-blue);
+      border-radius:16px; padding:20px; box-shadow:0 12px 40px rgba(2,6,23,.18);
+      display:flex; align-items:center; justify-content:center; height:220px;
+    }
+    .hero-card img{ max-width:220px; width:100%; height:auto; }
+
+    /* products */
+    .container{ max-width:1200px; margin:38px auto; padding:0 20px 60px }
+    .section-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px }
+    .section-head h3{ margin:0; color:var(--pz-blue) }
+    .grid{
+      display:grid; gap:18px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .card{
+      background:var(--pz-white); border-radius:14px; padding:14px;
+      box-shadow: 0 8px 24px rgba(16,24,40,.06);
+      display:flex; flex-direction:column; gap:10px; transform:translateY(16px) scale(.99); opacity:0;
+      transition: transform .45s cubic-bezier(.2,.9,.2,1), opacity .45s;
+    }
+    .card.visible{ transform:none; opacity:1 }
+    .card .imgwrap{ width:100%; aspect-ratio: 4/3; border-radius:10px; overflow:hidden; background:linear-gradient(180deg,#eee,#ddd); display:flex; align-items:center; justify-content:center }
+    .card .imgwrap img{ width:100%; height:100%; object-fit:cover }
+    .card h4{ margin:0; font-size:1.05rem }
+    .price-row{ display:flex; align-items:center; justify-content:space-between; gap:8px }
+    .price{ font-weight:800; color:var(--pz-blue) }
+    .small{ font-size:.9rem; color:#6b7280 }
+
+    /* buy actions */
+    .actions{ display:flex; gap:10px; margin-top:6px }
+    .buy{ flex:1; background:linear-gradient(90deg,var(--pz-blue), #0c57c0); color:white; border:none; padding:10px 12px; border-radius:10px; font-weight:700; cursor:pointer; transition: transform .12s, box-shadow .12s }
+    .buy:hover{ transform:translateY(-4px); box-shadow:0 14px 36px rgba(18,102,214,.16) }
+    .wishlist{ background:transparent; border:1px solid #e8eefc; padding:10px 12px; border-radius:10px; cursor:pointer }
+
+    /* cart drawer */
+    .cart-btn{
+      position:fixed; right:18px; bottom:18px; z-index:1002;
+      background:var(--pz-blue); color:white; padding:12px 14px; border-radius:14px; display:flex; gap:10px; align-items:center; box-shadow: 0 12px 36px rgba(18,102,214,.2);
+      cursor:pointer; border:none;
+    }
+    .cart-drawer{
+      position:fixed; right:18px; bottom:80px; width:340px; max-width:92vw; background:var(--pz-white); border-radius:14px; box-shadow: 0 20px 60px rgba(6,8,14,.18); padding:14px; z-index:1002;
+      transform:translateY(16px) scale(.98); opacity:0; pointer-events:none; transition:all .25s;
+    }
+    .cart-drawer.open{ transform:none; opacity:1; pointer-events:auto }
+    .cart-item{ display:flex; gap:12px; align-items:center; margin-bottom:12px }
+    .cart-item img{ width:56px; height:56px; object-fit:cover; border-radius:8px }
+    .cart-item .meta{ flex:1 }
+    .cart-actions{ display:flex; justify-content:space-between; align-items:center; margin-top:6px }
+
+    /* footer */
+    footer{ margin-top:40px; padding:40px 20px; border-top:1px solid #eef3fb; background:linear-gradient(0deg,#fff,#fafcff) }
+    .footer-grid{ max-width:1200px; margin:0 auto; display:flex; gap:20px; align-items:center; justify-content:space-between; padding:0 20px; flex-wrap:wrap }
+    .socials{ display:flex; gap:12px; align-items:center }
+    .socials a{ text-decoration:none; display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:transparent; border:1px solid #f0f4fb }
+
+    /* floating quick actions */
+    .float-actions{ position:fixed; left:18px; bottom:18px; display:flex; flex-direction:column; gap:10px; z-index:1002 }
+    .float-actions a{ display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:12px; background:var(--pz-blue); color:white; text-decoration:none; box-shadow:0 12px 36px rgba(18,102,214,.16) }
+
+    /* responsive */
+    @media (max-width:880px){
+      .hero .wrap{ grid-template-columns: 1fr; text-align:center }
+      .hero-card{ margin-top:8px; height:180px }
+      header{ padding:10px 14px }
+      .brand img{ width:42px; height:42px }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading (logo) -->
+  <div id="loading">
+    <img src="WhatsApp_Image_2025-08-06_at_12.20.42-removebg-preview.png" alt="PZ LIFESTYLE Logo">
+  </div>
+
+  <!-- Header -->
+  <header id="siteHeader">
+    <a class="brand" href="#home">
+      <img src="logo.png" alt="logo">
+      <h1>PZ LIFESTYLE</h1>
+    </a>
+
+    <nav class="main" aria-label="menu principal">
+      <a href="#colecao">Coleção</a>
+      <a href="#novidades">Novidades</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#contato">Contato</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <main>
+    <section class="hero" id="home" aria-label="apresentação">
+      <div class="wrap">
+        <div>
+          <h2>Estilo urbano. Entrega Portugal.</h2>
+          <p>Seleção de ténis e chuteiras em drops exclusivos. Peças com identidade oversized e vibe street. Enviaremos para todo o território português e internacioal.</p>
+          <div class="cta-row">
+            <a class="btn" href="#colecao">Ver coleção</a>
+            <a class="btn secondary" href="https://instagram.com/pz_lifestyle" target="_blank" rel="noopener">Instagram @pz_lifestyle</a>
+          </div>
+        </div>
+
+        <div class="hero-card" aria-hidden="true">
+          <img src="logo estampa.png" alt="PZ LIFESTYLE logo grande">
+        </div>
+      </div>
+    </section>
+
+    <!-- Collection -->
+    <section class="container" id="colecao">
+      <div class="section-head">
+        <h3>Coleção — Tênis & Chuteiras</h3>
+        <div class="small">Envio para Portugal · Pagamento por transferência ou MBWay</div>
+      </div>
+
+      <div class="grid" id="productGrid">
+        <!-- cards gerados por JS -->
+      </div>
+    </section>
+
+    <!-- About -->
+    <section class="container" id="sobre">
+      <div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap">
+        <div style="flex:1; min-width:260px">
+          <h3>Sobre nós</h3>
+          <p style="color:#374151;line-height:1.5">FUNDADA EM 23 DE OUTUBRO DE 2024, A PZ NASCEU COM UM PROPÓSITO CLARO: oferecer peças exclusivas para quem valoriza estilo e autenticidade.
+            Com todos os nossos envios destinados a Portugal, continuamos a conectar pessoas com estilos únicos.
+        VENHA DESCOBRIR SEU ESTILO COM A PZ.
+Junte-se a nós nessa jornada de expressão e autenticidade!</p>
+        </div>
+        <div style="width:320px; min-width:220px;">
+          <div style="background:var(--pz-blue); color:var(--pz-white); padding:18px; border-radius:12px; box-shadow:0 12px 30px rgba(18,102,214,.14)">
+            <strong>Contacto Rápido</strong>
+            <p style="margin:.6rem 0 0">Instagram: <a href="https://instagram.com/pz_lifestyle" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline">@pz_lifestyle</a></p>
+            <p style="margin:.3rem 0 0">WhatsApp: <a href="https://wa.me/351965809905" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline">+351 965 809 905</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-grid">
+        <div>
+          <strong>PZ LIFESTYLE</strong>
+          <div style="color:#6b7280; margin-top:6px">Copyright © 2025 — Todos os direitos reservados</div>
+        </div>
+        <div class="socials">
+          <a href="https://instagram.com/pz_lifestyle" target="_blank" rel="noopener">Instagram</a>
+          <a href="https://wa.me/351965809905" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Floating quick actions -->
+  <div class="float-actions" aria-hidden="false">
+    <a title="Instagram" href="https://instagram.com/pz_lifestyle" target="_blank" rel="noopener">IG</a>
+    <a title="WhatsApp" href="https://wa.me/351965809905" target="_blank" rel="noopener">WA</a>
+  </div>
+
+  <!-- Cart button + drawer -->
+  <button id="cartBtn" class="cart-btn" aria-label="abrir carrinho">
+    🛒 <span id="cartCount" style="font-weight:700">0</span>
+  </button>
+  <div id="cartDrawer" class="cart-drawer" aria-hidden="true">
+    <strong>Carrinho</strong>
+    <div id="cartItems" style="margin-top:10px"></div>
+    <div class="cart-actions">
+      <div class="small">Total: <span id="cartTotal">€0.00</span></div>
+      <button id="checkout" class="btn" style="background:var(--accent); color:#111">Finalizar</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    /***********************
+     * Simulação de dados (troca por teus produtos)
+     ***********************/
+    const products = [
+      { id:'t1', title:'Nike Mercurial Superfly 10 Academy LV8', price:89.99, img:'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/4dc0fced-e2d2-4874-8b86-b99a1809deec/ZM+SUPERFLY+10+ACAD+FG%2FMG+LV8.png' },
+      { id:'t2', title:'Nike Air Force 1', price:94.99, img:'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/82aa97ed-98bf-4b6f-9d0b-31a9f907077b/AIR+FORCE+1+%2707.png' },
+      { id:'c1', title:'Chuteira Nike Air Zoom Mercurial Vapor 16 Pro FG', price:89.99, img:'https://www.futbolemotion.com/imagesarticulos/268987/grandes/bota-nike-air-zoom-mercurial-vapor-16-pro-fg-magic-flamingo-black-total-crimson-0.webp?_gl=1*u18adr*_up*MQ..*_gs*MQ..&gclid=CjwKCAjwz5nGBhBBEiwA-W6XRI7mZtJ8Y2ZxNMmu6xnZOao563b6CfCyPi9o0CWPvGcnPd-1iVPnlxoCLzIQAvD_BwE' },
+      { id:'c2', title:'Nike SB Dunk Low Club 58', price:119.99, img:'https://cdn.shopify.com/s/files/1/2017/7541/files/Nike-SB-Dunk-Low-Club-58-Gulf-BQ6817-401-Release-Date-1.jpg?v=1604066749' },
+      { id:'t3', title:'Authentic Jersey Apparel Hoodie', price:94.99, img:'https://justinreed.com/cdn/shop/files/1_92ce24b6-6f3e-4d76-9a02-89cd860d6ef5.jpg?v=1689881669&width=990' },
+      { id:'c3', title:'THE NORTH FACE 1996 RETRO NUPTSE JACKET', price:149.90, img:'https://img.bstn.com/eyJidWNrZXQiOiJic3RuLWltYWdlLXNlcnZlciIsImtleSI6ImNhdGFsb2cvcHJvZHVjdC9ORjBBM0M4RDRHMzEvTkYwQTNDOEQ0RzMxLTAxLmpwZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJmaXQiOiJjb250YWluIiwid2lkdGgiOjExNjAsImhlaWdodCI6MTQ1MCwiYmFja2dyb3VuZCI6eyJyIjoyNTUsImciOjI1NSwiYiI6MjU1LCJhbHBoYSI6MX19fX0=' },
+      { id:'c4', title:'Montaigne Hoodie Large Fit in Black Faded', price:114.99, img:'https://image-raw.reversible.com/raw_images/71c93101a1c6a6c618338411d1e477ec31bed28d86b66b3f7696cf86f49862b9' },
+      { id:'c5', title:'Denim Tears The Cotton Wreath Sweatshirt - Black', price:109.90, img:'https://lisabonastreetwear.pt/cdn/shop/files/Denim-Tears-The-Cotton-Wreath-Sweatshirt-Black_2048x2048.png?v=1750930592' },
+      { id:'c6', title:'Palm Angels flame-print cotton hoodie', price:109.90, img:'https://image-raw.reversible.com/raw_images/971ae5cccf059b2744c798418640482a1475543347b732c9cc13cafe47bd799c' },
+      { id:'c7', title:'Palm Angels Layered Flames Vintage Hoody', price:109.90, img:'https://eu.kith.com/cdn/shop/products/PMBB117S23FLE0053040-FRONT.jpg?v=1681802686&width=1920' },
+      { id:'c8', title:'Denim Tears The Cotton Wreath Sweatshirt Royal Blue', price:109.90, img:'https://dripclub.pt/cdn/shop/files/imagem_2024-06-07_130947362.png?v=1717762191' },
+      { id:'c9', title:'Chuteira Nike Air Zoom Mercurial Superfly 9 Pro FG', price:89.99, img:'https://www.futbolemotion.com/imagesarticulos/218152/grandes/bota-nike-zoom-superfly-9-pro-fg-pink-foam-black-0.webp' },
+      { id:'d1', title:'Nike Air Zoom Mercurial Vapor XVI Pro FG', price:89.99, img:'https://images.prodirectsport.com/ProductImages/Main/1029101_Main_1902846.jpg' },
+      { id:'d2', title:'Nike Airzoom Mercurial Superfly 9 Air Max Plus Elite FG', price:89.99, img:'https://cdnx.jumpseller.com/olympic-store1/image/44434380/e342de92.jpg?1743619239' },
+      { id:'d3', title:'Chuteira Nike Mercurial Air Zoom Superfly 10 Elite FG', price:89.99, img:'https://www.futbolemotion.com/imagesarticulos/232352/grandes/bota-nike-mercurial-air-zoom-superfly-10-elite-fg-white-racer-blue-0.webp' },
+      { id:'d4', title:'Chuteira Nike Air Zoom Mercurial Superfly 10 Academy MDS FG/MG', price:89.99, img:'https://www.futbolemotion.com/imagesarticulos/237628/540/bota-nike-air-zoom-mercurial-superfly-10-akademie-mds-fg-mg-verde-0.jpg' },
+      { id:'d5', title:'Air Max Plus Tn - Panda', price:94.99, img:'https://www.tnsdoboss.com/cdn/shop/files/BCFA6825-29AC-4E87-AF8D-4E34E3D2F319.jpg?v=1732392780'},
+      { id:'d6', title:'Air Max Plus Tn - Black Metallic', price:94.99, img:'https://www.tnsdojota.com/wp-content/uploads/2022/07/58c023f9.jpeg' },
+      { id:'d7', title:'Air Max Plus Tn - Purple Dragon', price:94.99, img:'https://www.tnsdojota.com/wp-content/uploads/2024/08/ec06e090.jpeg' },
+      { id:'d8', title:'Air Max Plus Tn - FC Barcelona', price:94.99, img:'https://www.tnsdojota.com/wp-content/uploads/2023/10/64da56e4.jpeg' },
+      { id:'d9', title:'Conjunto Corteiz Brasil - Preto', price:109.90, img:'https://6ixcompany.com.br/cdn/shop/files/Sem-Titulo-2_d2d02a3f-d894-4ab0-a05d-a36e11de0066.jpg?v=1728439174' },
+      { id:'e1', title:'Conjunto Nike Tech - Preto', price:109.90, img:'https://thelinegroupcl.vtexassets.com/arquivos/ids/311987/43412.jpg?v=638755775821070000' },
+      { id:'e2', title:'Supreme Anna Nicole Smith Tee', price:79.90, img:'https://i.ebayimg.com/images/g/Fi8AAOSwOMVh3cYM/s-l1200.jpg' },
+      { id:'e3', title:'Knit Zip Up Fleece CORTEIZ (SUETER) - Preto', price:109.90, img:'https://dcdn-us.mitiendanube.com/stores/006/507/719/products/listrada-preta-6db3cfe18308fd791c17533090671864-480-0.png' },
+      { id:'e4', title:'Knit Zip Up Fleece CORTEIZ (SUETER) - Branco', price:109.90, img:'https://calzetshop.com/wp-content/uploads/2023/10/0a784ef4-removebg-preview-1000x1000.png' },
+      { id:'e5', title:'Solo Swoosh Woven Track Jacket (schwarz) - Preto', price:109.90, img:'https://img.bstn.com/eyJidWNrZXQiOiJic3RuLWltYWdlLXNlcnZlciIsImtleSI6ImNhdGFsb2cvcHJvZHVjdC9GQjg2MjItMDEwL0ZCODYyMi0wMTAtMDEuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7ImZpdCI6ImNvbnRhaW4iLCJ3aWR0aCI6NTgwLCJoZWlnaHQiOjcyNSwiYmFja2dyb3VuZCI6eyJyIjoyNTUsImciOjI1NSwiYiI6MjU1LCJhbHBoYSI6MX19fX0=' },
+      { id:'e6', title:'Solo Swoosh Woven Track Jacket (schwarz) - Marrom', price:109.90, img:'https://dcdn-us.mitiendanube.com/stores/004/027/723/products/1-3c3a405cbeac9bff6f17209818384576-480-0.png' },
+      { id:'e7', title:'Sportswear Hbr Stmt L', price:109.90, img:'https://www.trefac.jp/smartphone/image/item/3030005377552673/3030005377552673_01_8039w.jpeg' },
+      { id:'e8', title:'Essentials Fear of God Hoodie - Preto', price:109.90, img:'https://fearofgodapparel.com/wp-content/uploads/2022/11/image-3-compressed-1.jpg' },
+      { id:'e9', title:'Essentials Fear of God Hoodie - Branco', price:109.90, img:'https://fearofgodapparel.com/wp-content/uploads/2022/11/image-2-compressed-1.jpg' },
+      { id:'f1', title:'Essentials Fear of God Hoodie - Vermelho', price:109.90, img:'https://fearofgodapparel.com/wp-content/uploads/2022/11/image-6-compressed.jpg' },
+      { id:'f2', title:'Essentials Fear of God Hoodie - Cinza', price:109.90, img:'https://fearofgodapparel.com/wp-content/uploads/2022/11/image-5-compressed-1.jpg' },
+    ];
+
+    const productGrid = document.getElementById('productGrid');
+
+    function createCard(p){
+      const el = document.createElement('article');
+      el.className = 'card';
+      el.innerHTML = `
+        <div class="imgwrap"><img src="${p.img}" alt="${p.title}"></div>
+        <h4>${p.title}</h4>
+        <div class="price-row">
+          <div><span class="price">€${p.price.toFixed(2)}</span><div class="small">Envio PT</div></div>
+          <div style="text-align:right">
+            <div class="small">SKU: ${p.id}</div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="buy" data-id="${p.id}">Comprar</button>
+          <button class="wishlist" aria-label="favoritar">♡</button>
+        </div>
+      `;
+      return el;
+    }
+
+    // render
+    products.forEach(p => productGrid.appendChild(createCard(p)));
+
+    /***********************
+     * Animations: intersection observer para cards
+     ***********************/
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(ent=>{
+        if(ent.isIntersecting) ent.target.classList.add('visible');
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.card').forEach(c => observer.observe(c));
+
+    /***********************
+     * Header scroll effect
+     ***********************/
+    const header = document.getElementById('siteHeader');
+    window.addEventListener('scroll', ()=>{
+      if(window.scrollY > 24) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+    });
+
+    /***********************
+     * Loading screen hide
+     ***********************/
+    window.addEventListener('load', ()=>{
+      const ld = document.getElementById('loading');
+      setTimeout(()=>{ ld.classList.add('hidden'); setTimeout(()=>ld.style.display='none',600) }, 700);
+    });
+
+    /***********************
+     * Smooth scroll offset for fixed header
+     ***********************/
+    (function(){
+      const links = document.querySelectorAll('a[href^="#"]');
+      links.forEach(a=>{
+        a.addEventListener('click', (e)=>{
+          const href = a.getAttribute('href');
+          if(href.startsWith('#')){
+            e.preventDefault();
+            const el = document.querySelector(href);
+            if(!el) return;
+            const top = el.getBoundingClientRect().top + window.scrollY - 72;
+            window.scrollTo({ top, behavior:'smooth' });
+          }
+        });
+      });
+    })();
+
+    /***********************
+     * Carrinho simples usando localStorage
+     ***********************/
+    const cartKey = 'pz_cart_v1';
+    let cart = JSON.parse(localStorage.getItem(cartKey) || '{}');
+
+    function saveCart(){ localStorage.setItem(cartKey, JSON.stringify(cart)); renderCart(); updateCartCount(); }
+
+    function addToCart(id){
+      cart[id] = (cart[id] || 0) + 1;
+      saveCart();
+      pulseCartBtn();
+    }
+
+    function removeFromCart(id){
+      delete cart[id];
+      saveCart();
+    }
+
+    function quantityChange(id, delta){
+      cart[id] = Math.max(0, (cart[id]||0) + delta);
+      if(cart[id]===0) delete cart[id];
+      saveCart();
+    }
+
+    function getCartItems(){
+      return Object.keys(cart).map(id=>{
+        const prod = products.find(p=>p.id===id);
+        return { ...prod, qty: cart[id] };
+      });
+    }
+
+    function renderCart(){
+      const itemsWrap = document.getElementById('cartItems');
+      itemsWrap.innerHTML = '';
+      const items = getCartItems();
+      if(items.length===0){ itemsWrap.innerHTML = '<div class="small">Carrinho vazio</div>'; document.getElementById('cartTotal').textContent = '€0.00'; return; }
+      let total = 0;
+      items.forEach(it=>{
+        total += it.price * it.qty;
+        const row = document.createElement('div');
+        row.className = 'cart-item';
+        row.innerHTML = `
+          <img src="${it.img}" alt="${it.title}">
+          <div class="meta">
+            <div style="font-weight:700">${it.title}</div>
+            <div class="small">€${it.price.toFixed(2)} × ${it.qty}</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end">
+            <button data-id="${it.id}" class="small inc">+</button>
+            <button data-id="${it.id}" class="small dec">-</button>
+            <button data-id="${it.id}" class="small rem">Rem</button>
+          </div>
+        `;
+        itemsWrap.appendChild(row);
+      });
+      document.getElementById('cartTotal').textContent = '€' + total.toFixed(2);
+      // attach events
+      itemsWrap.querySelectorAll('.inc').forEach(b=>b.addEventListener('click', ()=>{ quantityChange(b.dataset.id, 1) }));
+      itemsWrap.querySelectorAll('.dec').forEach(b=>b.addEventListener('click', ()=>{ quantityChange(b.dataset.id, -1) }));
+      itemsWrap.querySelectorAll('.rem').forEach(b=>b.addEventListener('click', ()=>{ removeFromCart(b.dataset.id) }));
+    }
+
+    function updateCartCount(){
+      const count = Object.values(cart).reduce((s,n)=>s+n,0);
+      document.getElementById('cartCount').textContent = count;
+    }
+
+    function pulseCartBtn(){
+      const b = document.getElementById('cartBtn');
+      b.animate([{ transform:'scale(1)' },{ transform:'scale(1.08)' },{ transform:'scale(1)'}], { duration:400 });
+    }
+
+    // attach buy buttons
+    document.body.addEventListener('click', (e)=>{
+      if(e.target.matches('.buy')) {
+        const id = e.target.dataset.id;
+        addToCart(id);
+      }
+    });
+
+    // init cart
+    renderCart(); updateCartCount();
+
+    // cart drawer toggle
+    const cartBtn = document.getElementById('cartBtn');
+    const cartDrawer = document.getElementById('cartDrawer');
+    let drawerOpen = false;
+    cartBtn.addEventListener('click', ()=>{
+      drawerOpen = !drawerOpen;
+      cartDrawer.classList.toggle('open', drawerOpen);
+      cartDrawer.setAttribute('aria-hidden', String(!drawerOpen));
+    });
+
+    // checkout button — abre WhatsApp com resumo (simples)
+    document.getElementById('checkout').addEventListener('click', ()=>{
+      const items = getCartItems();
+      if(items.length===0) return alert('O carrinho está vazio.');
+      let text = 'Pedido PZ LIFESTYLE:%0A';
+      items.forEach(i=> text += `- ${i.title} x${i.qty} (€${i.price.toFixed(2)})%0A`);
+      const total = document.getElementById('cartTotal').textContent;
+      text += `%0ATotal: ${total}%0A%0ANome: %0ATelemóvel: `;
+      const url = 'https://wa.me/351965809905?text=' + text;
+      window.open(url,'_blank','noopener');
+    });
+
+    /***********************
+     * Pequena melhoria: animação de entrada do hero quando scroll
+     ***********************/
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const hero = document.querySelector('.hero h2');
+      if(hero) hero.animate([{opacity:0, transform:'translateY(18px)'},{opacity:1, transform:'translateY(0)'}], { duration:700, easing:'cubic-bezier(.2,.9,.2,1)' });
+    });
+
+  </script>
+</body>
+</html>
